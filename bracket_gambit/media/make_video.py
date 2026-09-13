@@ -126,6 +126,37 @@ def span_from_to(spans, start_pred, end_pred, after=0):
     return None
 
 
+def plan_short(spans, total):
+    """~70 s cut: title, roll-up, board read, first move, the human's move, a capture, close."""
+    P = lambda name: (lambda s: s[2] == name)
+    story = [dict(still=card(["Gambit", "BracketBot plays chess against you", "camera  ·  Stockfish  ·  its own arm"],
+                             sub="MuJoCo simulation of the robot's CAD model"), target=5, caption=None,
+                  narration="Gambit. Bracket Bot plays chess against you, with its camera, Stockfish, and its own arm.")]
+    first_obs = next(i for i, s in enumerate(spans) if s[2] == "OBSERVING")
+    story.append(dict(src=(0, spans[first_obs][0]), target=4, caption="Rolling up to the table",
+                      narration="It rolls up to the table."))
+    a, b, k = span_from_to(spans, P("OBSERVING"), lambda s: s[2] in ("THINKING", "WAITING_FOR_HUMAN"))
+    story.append(dict(src=(a, b), target=7, caption="Reads the board: 4 corner markers → homography → 64 squares. 16 white, 16 black.",
+                      narration="It reads the board with its head camera: corner markers, a homography, every square classified. Sixteen white, sixteen black."))
+    a, b, k = span_from_to(spans, P("THINKING"), P("VERIFYING"))
+    story.append(dict(src=(a, b), target=16, caption="Stockfish picks the move; the robot announces it and picks the piece by its shaft — watch the hand camera",
+                      narration="Stockfish chooses. The robot says its move, turns to face the square, picks the piece by its shaft, and sets it down until it feels the board. Then it looks again before it trusts the position."))
+    a, b, k2 = span_from_to(spans, P("VERIFYING"), P("WAITING_FOR_HUMAN"), after=k)
+    a, b, k3 = span_from_to(spans, P("OBSERVING"), P("THINKING"), after=k2)
+    story.append(dict(src=(a, b), target=7, caption="Your move: inferred from the change on the board, matched against every legal move",
+                      narration="Your turn. It infers your move from what changed on the board, matched against every legal move. No piece recognition, no typing."))
+    cap = next((i for i, s in enumerate(spans) if s[2] == "MOVING" and "captured" in s[3]), None)
+    if cap is not None:
+        a = spans[cap][0]
+        b = next((s[0] for s in spans[cap + 1:] if s[2] == "VERIFYING"), spans[-1][1])
+        story.append(dict(src=(a, b), target=16, caption="A capture: the taken piece goes to the tray first, then the attacker moves",
+                          narration="A capture: the taken piece goes to the tray first, then the attacking piece moves. Every move is verified by the camera; a wrong board is rejected and explained."))
+    story.append(dict(still=card(["Gambit", "Play a game against the robot.", "github.com/GautamM303/Gambit"],
+                                 sub="Bracket Bot hackathon"), target=5, caption=None,
+                      narration="Gambit. Come and play a game."))
+    return story
+
+
 def plan(spans, total):
     """The cut: list of dicts {src:(a,b) | still:img, target:s, caption, narration}."""
     P = lambda name: (lambda s: s[2] == name)
@@ -187,12 +218,12 @@ def plan(spans, total):
 
 
 # --------------------------------------------------------------------------- #
-def render(video, timeline, out, narrate=True):
+def render(video, timeline, out, narrate=True, short=False):
     cap = cv2.VideoCapture(str(video))
     total = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
     src_fps = cap.get(cv2.CAP_PROP_FPS) or FPS
     spans = find_segments(json.load(open(timeline)), total)
-    story = plan(spans, total)
+    story = (plan_short if short else plan)(spans, total)
     tmp = HERE / "_narration"
     tmp.mkdir(exist_ok=True)
     # narration first, so each segment is at least as long as its sentence
@@ -271,5 +302,6 @@ if __name__ == "__main__":
     ap.add_argument("--timeline", type=pathlib.Path, required=True)
     ap.add_argument("--out", type=pathlib.Path, default=HERE / "Bracket_Gambit_demo.mp4")
     ap.add_argument("--no-narration", action="store_true")
+    ap.add_argument("--short", action="store_true", help="~70 s cut instead of the 3-minute one")
     args = ap.parse_args()
-    render(args.video, args.timeline, args.out, narrate=not args.no_narration)
+    render(args.video, args.timeline, args.out, narrate=not args.no_narration, short=args.short)
