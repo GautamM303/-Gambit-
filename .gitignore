@@ -1,0 +1,28 @@
+# environments / caches
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# large generated media (recordings are re-created with `gambit.py play --sim --record`)
+*.mp4
+!bracket_gambit/media/Bracket_Gambit_demo.mp4
+chopped_urdf_v2/sim/chess_frames/
+chopped_urdf_v2/sim/gambit_frames/
+chopped_urdf_v2/sim/*.png
+chopped_urdf_v2/sim/*.timeline.json
+bracket_gambit/media/_narration/
+demos/pick_by_voice_frames.png
+
+# third-party binaries: see tools/stockfish/README.md for the download
+tools/stockfish/stockfish*
+!tools/stockfish/README.md
+*.zip
+*.tar.gz
+
+# per-robot calibration (created on the robot by `gambit.py calibrate`)
+gambit_calibration.json
+gambit_calibration.*.png
+
+# handout / scratch
+*.pdf

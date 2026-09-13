@@ -1,0 +1,27 @@
+[project]
+name = "bb-urdf"
+version = "0.2.0"
+description = "Visualize the urdf_v1 robot URDF in Rerun"
+# 3.9 so the macOS system python3 works out of the box; newer is fine (and is
+# what uv picks when it's installed).
+requires-python = ">=3.9"
+dependencies = [
+    "rerun-sdk>=0.26",
+    "numpy>=1.24",
+    "mujoco>=3.5.0",
+    "opencv-python>=5.0.0.93",
+    "imageio>=2.37.2",
+    "imageio-ffmpeg>=0.6.0",
+    "chess>=1.11.2",
+    "python-pptx>=1.0.2",
+]
+
+[tool.uv]
+# This project is just scripts (visualize_urdf.py) — there's nothing to build or
+# install, so `uv sync` only provisions the dependencies into ./.venv.
+package = false
+
+[dependency-groups]
+dev = [
+    "pytest>=8.4.2",
+]

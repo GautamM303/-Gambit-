@@ -1,0 +1,7 @@
+rnbqkbnr/pp2pppp/3p4/2P5/8/8/PPP1PPPP/RNBQKBNR w KQkq - 0 3
+rnbqkb1r/pp2pppp/3P1n2/8/8/8/PPP1PPPP/RNBQKBNR w KQkq - 1 4
+rnbqk2r/pp2bppp/5n2/8/8/8/PPP1PPPP/RNBQKBNR w KQkq - 0 5
+rnbq1rk1/pp2bppp/5n2/8/8/2N5/PPP1PPPP/R1BQKBNR w KQ - 2 6
+r1bq1rk1/pp2bppp/2n2n2/8/4P3/2N5/PPP2PPP/R1BQKBNR w KQ - 1 7
+r1bqr1k1/pp2bppp/2n2n2/8/4P3/2N2N2/PPP2PPP/R1BQKB1R w KQ - 3 8
+START
